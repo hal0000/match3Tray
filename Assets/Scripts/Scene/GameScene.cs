@@ -1,10 +1,14 @@
+using System;
 using Match3Tray.Core;
 using Match3Tray.Gameplay;
 using Match3Tray.Interface;
 using Match3Tray.Logging;
+using Match3Tray.Manager;
+using Match3Tray.Model;
 using Match3Tray.Pool;
 using PrimeTween;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Match3Tray.Scene
 {
@@ -36,6 +40,7 @@ namespace Match3Tray.Scene
             base.Awake();
             _gameManager.CurrentScene = this;
             _ray.OnPicked += OnPicked;
+            EventManager.OnGameStateChanged += GameStateChanged;
         }
 
         public override void Start()
@@ -50,8 +55,25 @@ namespace Match3Tray.Scene
         {
             base.OnDestroy();
             if (_ray != null) _ray.OnPicked -= OnPicked;
+            EventManager.OnGameStateChanged -= GameStateChanged;
         }
-
+        private void GameStateChanged(Enums.GameState newState)
+        {
+            switch (newState)
+            {
+                case Enums.GameState.Idle:
+                    break;
+                case Enums.GameState.Playing:
+                    break;
+                case Enums.GameState.NextLevelPrompt:
+                    break;
+                case Enums.GameState.FailedPrompt:
+                    break;
+                case Enums.GameState.GameFinishedPrompt:
+                    break;
+            }
+            
+        }
         private void OnPicked(IFruit fruit)
         {
             if (fruit == null) return;
