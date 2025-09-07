@@ -6,6 +6,7 @@ namespace Match3Tray.Core
     public class BaseScene : MonoBehaviour
     {
         private protected GameManager _gameManager;
+
         public virtual void Awake()
         {
             _gameManager = GameManager.Instance;

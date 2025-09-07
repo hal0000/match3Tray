@@ -13,16 +13,26 @@ namespace Match3Tray.Core
             Tick();
         }
 
-        protected virtual void OnEnable() => EventManager.OnPauseChanged += HandlePauseChanged;
+        protected virtual void OnEnable()
+        {
+            EventManager.OnPauseChanged += HandlePauseChanged;
+        }
 
-        protected virtual void OnDisable() => EventManager.OnPauseChanged -= HandlePauseChanged;
+        protected virtual void OnDisable()
+        {
+            EventManager.OnPauseChanged -= HandlePauseChanged;
+        }
 
         protected virtual void HandlePauseChanged(bool paused)
         {
             _isPaused = paused;
             OnPauseUpdate(paused);
         }
-        protected virtual void OnPauseUpdate(bool paused) { }
+
+        protected virtual void OnPauseUpdate(bool paused)
+        {
+        }
+
         protected abstract void Tick();
     }
 }
