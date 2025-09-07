@@ -33,6 +33,7 @@ namespace Match3Tray.Binding
     ///     - Nested: [expression] [&& or ||] ([expression] [operator] [expression])
     /// </summary>
     [RequireComponent(typeof(MonoBehaviour))]
+    [DefaultExecutionOrder(-300)]
     public class UIBoolBinding : UIBinding
     {
         private static readonly string[] ComparisonOperators = { ">=", "<=", "==", "!=", ">", "<" };

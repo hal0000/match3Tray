@@ -1,4 +1,5 @@
 using System;
+using Match3Tray.Binding;
 using Match3Tray.Core;
 using Match3Tray.Gameplay;
 using Match3Tray.Interface;
@@ -12,7 +13,8 @@ using Random = UnityEngine.Random;
 
 namespace Match3Tray.Scene
 {
-    public class GameScene : BaseScene
+    [DefaultExecutionOrder(-450)]
+    public class GameScene : BaseScene, IBindingContext
     {
         [Header("Refs")] [SerializeField] private RayController _ray;
 
@@ -34,12 +36,22 @@ namespace Match3Tray.Scene
 
         [Header("Tray")] [SerializeField] [Min(3)]
         private int _traySize = 7;
+        
+        [HideInInspector] public Enums.GameState GameState = Enums.GameState.Idle;
+
+        public Bindable<int> GameStateIndex { get; } = new();
+        public Bindable<string> GameStateText { get; private set; }
+        
+        public Bindable<int> Level { get; } = new();
+        public Bindable<int> Gold { get; } = new();
+
 
         public override void Awake()
         {
             base.Awake();
             _gameManager.CurrentScene = this;
             _ray.OnPicked += OnPicked;
+            RegisterBindingContext();
             EventManager.OnGameStateChanged += GameStateChanged;
         }
 
@@ -48,7 +60,7 @@ namespace Match3Tray.Scene
             base.Start();
             _tray.Init(_traySize);
             _pool.InitializePools();
-            SpawnOnFloor_FromDefinitions();
+            SetBindingData();
         }
 
         public override void OnDestroy()
@@ -56,6 +68,13 @@ namespace Match3Tray.Scene
             base.OnDestroy();
             if (_ray != null) _ray.OnPicked -= OnPicked;
             EventManager.OnGameStateChanged -= GameStateChanged;
+            UnregisterBindingContext();
+        }
+
+        public void StartButton()
+        {
+            SpawnOnFloor_FromDefinitions();
+            EventManager.GameStateChanged(Enums.GameState.Playing);
         }
         private void GameStateChanged(Enums.GameState newState)
         {
@@ -72,7 +91,9 @@ namespace Match3Tray.Scene
                 case Enums.GameState.GameFinishedPrompt:
                     break;
             }
-            
+            GameState = newState;
+            GameStateText.Value = GameState.ToString();
+            GameStateIndex.Value = (int)newState;
         }
         private void OnPicked(IFruit fruit)
         {
@@ -199,6 +220,23 @@ namespace Match3Tray.Scene
                         rb.WakeUp();
                     }
                 }
+        }
+
+        public void SetBindingData()
+        {
+            GameStateText = new Bindable<string>(GameState.ToString());
+            Gold.Value = 5000;
+            Level.Value = 1;
+        }
+
+        public void RegisterBindingContext()
+        {
+            BindingContextRegistry.Register(GetType().Name, this);
+        }
+
+        public void UnregisterBindingContext()
+        {
+            BindingContextRegistry.Unregister(GetType().Name, this);
         }
     }
 }

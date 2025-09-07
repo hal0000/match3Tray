@@ -7,6 +7,7 @@ namespace Match3Tray.Manager
     ///     Central manager class that handles core game systems, scene management, and resource loading.
     ///     Implements the Singleton pattern for global access to game systems.
     /// </summary>
+    [DefaultExecutionOrder(-500)]
     public class GameManager : MonoBehaviour
     {
         /// <summary>

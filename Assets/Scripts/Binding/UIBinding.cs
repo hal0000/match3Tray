@@ -19,6 +19,7 @@ namespace Match3Tray.Binding
     ///     Provides a flexible binding system that connects UI elements to Bindable properties.
     /// </summary>
     [RequireComponent(typeof(MonoBehaviour))]
+    [DefaultExecutionOrder(-400)]
     public abstract class UIBinding : MonoBehaviour
     {
         /// <summary>
