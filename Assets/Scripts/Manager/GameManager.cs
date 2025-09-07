@@ -22,7 +22,6 @@ namespace Match3Tray.Manager
 
         private void Awake()
         {
-            Application.targetFrameRate = 120;
             if (Instance != null && Instance != this)
             {
                 Destroy(gameObject);
