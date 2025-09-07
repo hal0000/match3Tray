@@ -1664,6 +1664,7 @@ GameObject:
   m_Component:
   - component: {fileID: 697689457}
   - component: {fileID: 697689458}
+  - component: {fileID: 697689459}
   m_Layer: 0
   m_Name: Settings
   m_TagString: Untagged
@@ -1701,6 +1702,21 @@ MonoBehaviour:
   hardCapHz: 240
   fallbackHz: 60
   log: 0
+--- !u!114 &697689459
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 697689456}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d8a5da3e43846b6b5efb21fb79c8bb5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cam: {fileID: 330585545}
+  floorRenderer: {fileID: 1080904946}
+  padding: 0.1
 --- !u!1001 &780612924
 PrefabInstance:
   m_ObjectHideFlags: 0

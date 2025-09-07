@@ -1,53 +1,92 @@
 using System;
+using System.Collections.Generic;
 using Match3Tray.Core;
 using Match3Tray.Interface;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 namespace Match3Tray.Gameplay
 {
     public class RayController : MonoBehaviourExtra
     {
-        private static readonly RaycastHit[] _hits = new RaycastHit[8];
+        static readonly RaycastHit[] _hits = new RaycastHit[8];
+        static readonly List<RaycastResult> _uiHits = new List<RaycastResult>(8);
+
         public Camera Cam;
         public LayerMask ItemMask;
         public event Action<IFruit> OnPicked;
 
-        private void TryPick(Vector2 screenPos)
+        InputAction _press;
+
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+            if (_press == null)
+            {
+                _press = new InputAction(type: InputActionType.Button);
+                _press.AddBinding("<Pointer>/press");
+                _press.AddBinding("<Touchscreen>/primaryTouch/press");
+                _press.AddBinding("<Pen>/tip"); // stylus
+                _press.started += OnPressStarted;
+            }
+            _press.Enable();
+        }
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+            if (_press == null) return;
+            _press.started -= OnPressStarted;
+            _press.Disable();
+        }
+
+        void OnPressStarted(InputAction.CallbackContext ctx)
+        {
+            if (Cam == null) Cam = Camera.main;
+            if (Cam == null) return;
+
+            Vector2 screenPos;
+
+            var dev = ctx.control.device;
+            if (dev is Mouse m)            screenPos = m.position.ReadValue();
+            else if (dev is Touchscreen t) screenPos = t.primaryTouch.position.ReadValue();
+            else if (dev is Pen pen)       screenPos = pen.position.ReadValue();
+            else if (Pointer.current != null) screenPos = Pointer.current.position.ReadValue();
+            else return;
+
+            if (IsOverUI(screenPos)) return; // güvenilir UI filtresi
+            TryPick(screenPos);
+        }
+
+        bool IsOverUI(Vector2 screenPos)
+        {
+            if (EventSystem.current == null) return false;
+            var ped = new PointerEventData(EventSystem.current) { position = screenPos };
+            _uiHits.Clear();
+            EventSystem.current.RaycastAll(ped, _uiHits);
+            return _uiHits.Count > 0;
+        }
+
+        void TryPick(Vector2 screenPos)
         {
             var ray = Cam.ScreenPointToRay(screenPos);
-            var n = Physics.RaycastNonAlloc(ray, _hits, 100f, ItemMask, QueryTriggerInteraction.Ignore);
+            int n = Physics.RaycastNonAlloc(ray, _hits, 100f, ItemMask, QueryTriggerInteraction.Ignore);
             if (n <= 0) return;
-            var best = 0;
-            var d = _hits[0].distance;
-            for (var i = 1; i < n; i++)
-                if (_hits[i].distance < d)
-                {
-                    d = _hits[i].distance;
-                    best = i;
-                }
+            int best = 0;
+            float d = _hits[0].distance;
+            for (int i = 1; i < n; i++)
+                if (_hits[i].distance < d) { d = _hits[i].distance; best = i; }
 
-            if (_hits[best].collider.transform.parent.TryGetComponent<IFruit>(out var fruit)) OnPicked?.Invoke(fruit);
+            var col = _hits[best].collider;
+            if (col == null) return;
+            // collider child'da ise parenttan bile komponenti yakala
+            if (col.transform.parent.TryGetComponent<IFruit>(out var temp))
+            {
+                OnPicked?.Invoke(temp);
+            }
         }
 
-        protected override void Tick()
-        {
-#if UNITY_EDITOR || UNITY_STANDALONE
-            if (!Input.GetMouseButtonDown(0)) return;
-            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
-
-            TryPick(Input.mousePosition);
-#else
-    if (Input.touchCount > 0)
-    {
-        var t = Input.GetTouch(0);
-        if (t.phase == TouchPhase.Began)
-        {
-            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject(t.fingerId))return;
-            TryPick(t.position);
-        }
-    }
-#endif
-        }
+        protected override void Tick() { /* event-driven; boş */ }
     }
 }
