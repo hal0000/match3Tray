@@ -1,4 +1,5 @@
 using System;
+using Match3Tray.Model;
 
 namespace Match3Tray.Manager
 {
@@ -20,5 +21,27 @@ namespace Match3Tray.Manager
             IsGamePaused = isPaused;
             OnPauseChanged?.Invoke(isPaused);
         }
+        #region GameStateActions
+
+        /// <summary>
+        ///     Delegate for handling player events.
+        /// </summary>
+        public delegate void GameState(Enums.GameState type);
+
+        /// <summary>
+        ///     Event triggered when a player make an action
+        /// </summary>
+        public static event GameState OnGameStateChanged;
+
+
+        /// <summary>
+        ///     Notifies subscribers that a player did something
+        /// </summary>
+        public static void GameStateChanged(Enums.GameState type)
+        {
+            OnGameStateChanged?.Invoke(type);
+        }
+
+        #endregion
     }
 }
