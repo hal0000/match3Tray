@@ -40,8 +40,8 @@ namespace Match3Tray.UI
         private void Refresh()
         {
             int screenW = Screen.width, screenH = Screen.height;
-            ScreenOrientation orientation = Screen.orientation;
-            Rect safeArea = GetSafeArea();
+            var orientation = Screen.orientation;
+            var safeArea = GetSafeArea();
             if (safeArea.Equals(_lastSafeArea) && _lastScreenSize.x == screenW && _lastScreenSize.y == screenH && orientation == _lastOrientation) return;
             _lastScreenSize = new Vector2Int(screenW, screenH);
             _lastOrientation = orientation;
@@ -52,10 +52,10 @@ namespace Match3Tray.UI
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private Rect GetSafeArea()
         {
-            Rect safeArea = Screen.safeArea;
+            var safeArea = Screen.safeArea;
             if (!Application.isEditor || Sim == SimDevice.None) return safeArea;
             Rect nsa = new(0, 0, 1, 1);
-            bool isPortrait = Screen.height > Screen.width;
+            var isPortrait = Screen.height > Screen.width;
             switch (Sim)
             {
                 case SimDevice.IPhoneX:
@@ -79,7 +79,6 @@ namespace Match3Tray.UI
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void ApplySafeArea(Rect safeArea, int screenWidth, int screenHeight)
         {
-            // If not conforming on X or Y, set full dimension
             if (!ConformX)
             {
                 safeArea.x = 0;
@@ -92,15 +91,13 @@ namespace Match3Tray.UI
                 safeArea.height = screenHeight;
             }
 
-            // Convert absolute safe area to normalized anchors.
-            Vector2 anchorMin = safeArea.position;
-            Vector2 anchorMax = safeArea.position + safeArea.size;
+            var anchorMin = safeArea.position;
+            var anchorMax = safeArea.position + safeArea.size;
             anchorMin.x /= screenWidth;
             anchorMin.y /= screenHeight;
             anchorMax.x /= screenWidth;
             anchorMax.y /= screenHeight;
 
-            // Guard against NaN values (Some Samsung devices may return NaN on first call)
             if (float.IsNaN(anchorMin.x) || float.IsNaN(anchorMin.y) || float.IsNaN(anchorMax.x) || float.IsNaN(anchorMax.y)) return;
             _panel.anchorMin = anchorMin;
             _panel.anchorMax = anchorMax;
@@ -117,10 +114,8 @@ namespace Match3Tray.UI
             Pixel3XlLsr
         }
 
-        // Simulation mode editor-only.
         public static SimDevice Sim = SimDevice.None;
 
-        // These arrays are constant and made static readonly.
         private static readonly Rect[] NSA_iPhoneX =
         {
             new(0f, 102f / 2436f, 1f, 2202f / 2436f), // Portrait

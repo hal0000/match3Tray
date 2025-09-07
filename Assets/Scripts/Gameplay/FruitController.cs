@@ -13,14 +13,10 @@ namespace Match3Tray.Gameplay
 
         private void Awake()
         {
-            if (Rigidbody != null)
-            {
-                Rigidbody.isKinematic = true;
-                Rigidbody.useGravity = false;
-                Rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
-            }
-
-            if (Collider != null) Collider.enabled = true;
+            Rigidbody.isKinematic = true;
+            Rigidbody.useGravity = false;
+            Rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+            Collider.enabled = true;
         }
 
         public int TypeId => (int)Model.Type;
@@ -30,18 +26,23 @@ namespace Match3Tray.Gameplay
         public void MarkInTray(bool v)
         {
             Model.Busy = v;
-            if (Collider != null) Collider.enabled = !v;
-            if (Rigidbody != null)
+            Collider.enabled = !v;
+            if (v)
             {
-                Rigidbody.isKinematic = v;
-                Rigidbody.useGravity = !v;
-                if (!v) Rigidbody.WakeUp();
+                Rigidbody.isKinematic = true;
+                Rigidbody.useGravity = false;
+            }
+            else
+            {
+                Rigidbody.isKinematic = false;
+                Rigidbody.useGravity = true;
+                Rigidbody.WakeUp();
             }
         }
 
         public void SetColliderActive(bool val)
         {
-            if (Collider != null) Collider.enabled = val;
+            Collider.enabled = val;
         }
 
         public void Init(FruitModel model)
@@ -51,7 +52,7 @@ namespace Match3Tray.Gameplay
 
         public void OnSpawn()
         {
-            if (Collider != null) Collider.enabled = true;
+            Collider.enabled = true;
             Model.Busy = false;
         }
     }

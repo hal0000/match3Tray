@@ -54,7 +54,6 @@ namespace Match3Tray.Binding
         /// </summary>
         private static readonly ArrayPool<object> sPool = ArrayPool<object>.Shared;
 
-        // üst seviye karşılaştırma
         private static readonly string[] ComparisonOps = { ">=", "<=", "==", "!=", ">", "<" };
 
         /// <summary>
@@ -162,7 +161,6 @@ namespace Match3Tray.Binding
             return ParseLogicalOr(expression.Trim());
         }
 
-        // en düşük öncelik: ||
         private ExpressionNode ParseLogicalOr(string expr)
         {
             var idx = FindOperatorOutsideParens(expr, "||");
@@ -177,7 +175,6 @@ namespace Match3Tray.Binding
             return ParseLogicalAnd(expr);
         }
 
-        // orta öncelik: &&
         private ExpressionNode ParseLogicalAnd(string expr)
         {
             var idx = FindOperatorOutsideParens(expr, "&&");
@@ -210,14 +207,11 @@ namespace Match3Tray.Binding
             return ParsePrimary(expr);
         }
 
-        // en yüksek öncelik: parantez, literal veya bindable
         private ExpressionNode ParsePrimary(string expr)
         {
             expr = expr.Trim();
-            // parantezli
             if (expr.Length >= 2 && expr[0] == '(' && expr[^1] == ')')
             {
-                // derinliği kontrol ederek gerçekten tüm ifade paranteze sarılı mı diye bak
                 var depth = 0;
                 for (var i = 0; i < expr.Length; i++)
                 {
@@ -234,15 +228,12 @@ namespace Match3Tray.Binding
                     return ParseExpressionTree(expr.Substring(1, expr.Length - 2));
             }
 
-            // bool literal
             if (bool.TryParse(expr, out var b))
                 return new ExpressionNode { Type = ExpressionNode.NodeType.Value, Value = b };
 
-            // sayısal literal
             if (double.TryParse(expr, out var d))
                 return new ExpressionNode { Type = ExpressionNode.NodeType.Value, Value = d };
 
-            // aksi halde binding ifadesi (örneğin MenuScene.Gold)
             var info = ParseExpression(expr);
             return new ExpressionNode
             {
@@ -258,7 +249,6 @@ namespace Match3Tray.Binding
         private int FindOperatorOutsideParens(string expr, string op)
         {
             var depth = 0;
-            // logical operatörler için sağdan sola doğru bakmak lazım (lowest-precedence split için)
             for (var i = expr.Length - op.Length; i >= 0; i--)
             {
                 var c = expr[i];
@@ -272,7 +262,6 @@ namespace Match3Tray.Binding
                 }
                 else if (depth == 0)
                 {
-                    // substring ile op araması
                     var match = true;
                     for (var j = 0; j < op.Length; j++)
                         if (expr[i + j] != op[j])
@@ -293,19 +282,15 @@ namespace Match3Tray.Binding
         /// </summary>
         private Delegate CreateValueChangedHandler(Type bindableType)
         {
-            // 1) bindableType == typeof(Bindable<T>), ondan gerçek T tipini alıyoruz:
             var valueType = bindableType.GetGenericArguments()[0];
 
-            // 2) EventInfo’den gerçek handler tipini (Action<T>) çek:
             var eventInfo = bindableType.GetEvent("OnValueChanged", BindingFlags.Instance | BindingFlags.Public)!;
             var handlerType = eventInfo.EventHandlerType!;
 
-            // 3) Bu sınıftaki OnValueChanged<T>(T _) metodunu T ile oluştur:
             var method = GetType()
                 .GetMethod(nameof(OnValueChanged), BindingFlags.NonPublic | BindingFlags.Instance)!
                 .MakeGenericMethod(valueType);
 
-            // 4) Delegate’i Action<T> olarak yarat:
             return Delegate.CreateDelegate(handlerType, this, method);
         }
 
@@ -318,7 +303,6 @@ namespace Match3Tray.Binding
                 return null;
             }
 
-            // 1) Bool literal?
             if (bool.TryParse(value, out var boolValue))
                 return new ExpressionNode
                 {
@@ -326,7 +310,6 @@ namespace Match3Tray.Binding
                     Value = boolValue
                 };
 
-            // 2) Numeric literal?
             if (double.TryParse(value, out var numValue))
                 return new ExpressionNode
                 {
@@ -334,7 +317,6 @@ namespace Match3Tray.Binding
                     Value = numValue
                 };
 
-            // 3) O zaman binding deniyoruz:
             var binding = ParseExpression(value);
             if (binding.Prop != null)
             {
@@ -347,7 +329,6 @@ namespace Match3Tray.Binding
                 };
             }
 
-            // Hiçbiri değilse gerçekten geçersiz:
             LoggerExtra.LogError($"[{name}] UIBoolBinding: Invalid value: {value}", this);
             return null;
         }
@@ -467,7 +448,6 @@ namespace Match3Tray.Binding
             var ctxName = expr.Substring(0, dot).Trim();
             var propName = expr.Substring(dot + 1).Trim();
 
-            // Get context from registry
             var ctx = BindingContextRegistry.Get(ctxName);
             if (ctx == null)
             {
@@ -482,7 +462,6 @@ namespace Match3Tray.Binding
                 return default;
             }
 
-            // Get the Bindable property value
             var bindableValue = prop.GetValue(ctx);
             if (bindableValue == null)
             {
@@ -490,7 +469,6 @@ namespace Match3Tray.Binding
                 return default;
             }
 
-            // Get the Value property from Bindable
             var valueProp = bindableValue.GetType().GetProperty("Value");
             if (valueProp == null)
             {
@@ -498,7 +476,6 @@ namespace Match3Tray.Binding
                 return default;
             }
 
-            // Get the OnValueChanged event from the Bindable instance
             var eventInfo = bindableValue.GetType().GetEvent("OnValueChanged");
             if (eventInfo == null)
             {

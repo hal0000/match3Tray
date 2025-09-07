@@ -50,7 +50,6 @@ namespace Match3Tray.UI
         /// </summary>
         public override void Start()
         {
-            // pre‑compute once - check for any format placeholder
             _delimiterIsComposite = !string.IsNullOrEmpty(Delimiter) && Delimiter.Contains("{") && Delimiter.Contains("}");
             base.Start();
         }
@@ -69,34 +68,25 @@ namespace Match3Tray.UI
                 return;
             }
 
-            // Format numbers if needed
             if (IsFormatted)
-                for (int i = 0; i < count; i++)
-                {
-                    if (values[i] is IConvertible convertible) values[i] = Format(Convert.ToDouble(convertible));
-                }
+                for (var i = 0; i < count; i++)
+                    if (values[i] is IConvertible convertible)
+                        values[i] = Format(Convert.ToDouble(convertible));
 
-            // Apply text formatting
             try
             {
                 if (_delimiterIsComposite)
                 {
-                    // Smart format string handling
                     _txt.text = string.Format(Delimiter, values);
                 }
                 else if (count == 1)
                 {
-                    // Fast path for single value
                     _txt.text = values[0]?.ToString() ?? string.Empty;
                 }
                 else
                 {
-                    // Multiple values with delimiter
-                    string[] stringValues = new string[count];
-                    for (int i = 0; i < count; i++)
-                    {
-                        stringValues[i] = values[i]?.ToString() ?? string.Empty;
-                    }
+                    var stringValues = new string[count];
+                    for (var i = 0; i < count; i++) stringValues[i] = values[i]?.ToString() ?? string.Empty;
 
                     _txt.text = string.Join(Delimiter, stringValues);
                 }

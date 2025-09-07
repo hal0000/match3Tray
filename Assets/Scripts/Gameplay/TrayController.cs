@@ -13,9 +13,26 @@ namespace Match3Tray.Gameplay
         private Tray _tray;
         private IFruit[] _visual;
 
+        public int CurrentCount
+        {
+            get
+            {
+                var c = 0;
+                for (var i = 0; i < _visual.Length; i++)
+                    if (_visual[i] != null)
+                        c++;
+                return c;
+            }
+        }
+
         private void Awake()
         {
             _visual = new IFruit[Slots.Length];
+        }
+
+        public bool IsFull()
+        {
+            return _tray.IsFull();
         }
 
         public void Init(int capacity)
@@ -77,7 +94,6 @@ namespace Match3Tray.Gameplay
 
             return (true, res.Cleared, cleared);
         }
-
 
         private void SnapRootToSlot(IFruit fruit, Transform slot)
         {

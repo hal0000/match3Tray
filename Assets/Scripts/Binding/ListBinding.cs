@@ -9,29 +9,24 @@ namespace Match3Tray.Binding
     /// </summary>
     public class ListBinding<T> : Bindable<IList<T>>
     {
-        // Cache for type info
         private static readonly Type _listType = typeof(ListBinding<T>);
         private static readonly Type _itemType = typeof(T);
 
         private int _count;
 
-        // Instance context variables
         private int _index = -1;
         private T _iterator;
 
-        // Constructor
         public ListBinding() : base(new List<T>())
         {
             _count = Value?.Count ?? 0;
         }
 
-        // Constructor with initial items
         public ListBinding(IList<T> initialItems) : base(initialItems ?? new List<T>())
         {
             _count = Value?.Count ?? 0;
         }
 
-        // Override Value to update Count
         public new IList<T> Value
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

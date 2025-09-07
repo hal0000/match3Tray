@@ -1,8 +1,3 @@
-// --------------------------------------------------------------------------------------------------------------------
-// Copyright (C) 2024 Halil Mentes
-// All rights reserved.
-// --------------------------------------------------------------------------------------------------------------------
-
 using System;
 using System.Collections.Generic;
 using Match3Tray.Interface;
@@ -130,13 +125,11 @@ namespace Match3Tray.UI
             _rectTransform = GetComponent<RectTransform>();
             _defaultPivot = _rectTransform.pivot;
             _defaultPosition = transform.localPosition;
-            // If no target position was set in Inspector, use the default.
             if (TargetPosition == Vector3.zero) TargetPosition = _defaultPosition;
             if (AnimAlpha) TraverseAndCache(transform);
             Initialize();
         }
 
-        // ULTRA OPTIMIZED CLEANUP
         public virtual void OnDestroy()
         {
             _animatables = null;
@@ -147,10 +140,9 @@ namespace Match3Tray.UI
         {
             if (_isInitialized) return;
 
-            Type type = GetType();
+            var type = GetType();
 
-            // 1. Check type cache first (FASTEST PATH)
-            if (_typeCache.TryGetValue(type, out IAnimatable[] cached))
+            if (_typeCache.TryGetValue(type, out var cached))
             {
                 _animatables = cached;
                 _animatableCount = _typeCountCache[type];
@@ -158,20 +150,16 @@ namespace Match3Tray.UI
                 return;
             }
 
-            // 2. Create new cache (SLOW PATH - but only once per type)
-            List<IAnimatable> list = _listPool.Get();
+            var list = _listPool.Get();
             try
             {
                 GetComponentsInChildren(false, list);
 
-                // Pre-allocate array with exact size
                 _animatables = new IAnimatable[list.Count];
                 _animatableCount = list.Count;
 
-                // Fast array copy
                 Array.Copy(list.ToArray(), _animatables, _animatableCount);
 
-                // Cache for future use
                 _typeCache[type] = _animatables;
                 _typeCountCache[type] = _animatableCount;
             }
@@ -221,11 +209,7 @@ namespace Match3Tray.UI
 
             IsVisible = true;
 
-            // ULTRA OPTIMIZED LOOP - No bounds checking, no null checks
-            for (int i = 0; i < _animatableCount; i++)
-            {
-                _animatables[i].OnParentVisibilityChanged(true);
-            }
+            for (var i = 0; i < _animatableCount; i++) _animatables[i].OnParentVisibilityChanged(true);
 
             ShowAnimations();
             OnShow?.Invoke();
@@ -241,10 +225,7 @@ namespace Match3Tray.UI
 
             IsVisible = false;
 
-            for (int i = 0; i < _animatableCount; i++)
-            {
-                _animatables[i].OnParentVisibilityChanged(false);
-            }
+            for (var i = 0; i < _animatableCount; i++) _animatables[i].OnParentVisibilityChanged(false);
 
             HideAnimations();
             OnHide?.Invoke();
@@ -259,21 +240,21 @@ namespace Match3Tray.UI
 
             if (AnimScale)
             {
-                Transform tr = transform;
+                var tr = transform;
                 _rectTransform.pivot = AnimationPivot;
                 Tween.Scale(tr, tr.localScale, DefaultScale, AnimDuration, Ease.OutSine).OnComplete(() => { _rectTransform.pivot = _defaultPivot; });
             }
 
             if (AnimPosition)
             {
-                Transform tr = transform;
+                var tr = transform;
                 Tween.LocalPosition(tr, tr.localPosition, _defaultPosition, AnimDuration, Ease.OutSine);
             }
 
             if (!AnimAlpha) return;
-            foreach (TextMeshProUGUI tmp in _textMeshPros)
+            foreach (var tmp in _textMeshPros)
                 Tween.Alpha(tmp, tmp.color.a, 1f, AnimDuration, Ease.OutSine).OnComplete(() => { tmp.raycastTarget = true; });
-            foreach (Graphic graphic in _graphics)
+            foreach (var graphic in _graphics)
                 Tween.Alpha(graphic, graphic.color.a, 1f, AnimDuration, Ease.OutSine).OnComplete(() => { graphic.raycastTarget = true; });
         }
 
@@ -286,20 +267,20 @@ namespace Match3Tray.UI
 
             if (AnimScale)
             {
-                Transform tr = transform;
+                var tr = transform;
                 Tween.Scale(tr, tr.localScale, Vector3.zero, AnimDuration, Ease.InSine).OnComplete(() => { _rectTransform.pivot = _defaultPivot; });
             }
 
             if (AnimPosition)
             {
-                Transform tr = transform;
+                var tr = transform;
                 Tween.LocalPosition(tr, tr.localPosition, TargetPosition, AnimDuration, Ease.InSine);
             }
 
             if (!AnimAlpha) return;
-            foreach (TextMeshProUGUI tmp in _textMeshPros)
+            foreach (var tmp in _textMeshPros)
                 Tween.Alpha(tmp, tmp.color.a, 0f, AnimDuration, Ease.InSine).OnComplete(() => { tmp.raycastTarget = false; });
-            foreach (Graphic graphic in _graphics)
+            foreach (var graphic in _graphics)
                 Tween.Alpha(graphic, graphic.color.a, 0f, AnimDuration, Ease.InSine).OnComplete(() => { graphic.raycastTarget = false; });
         }
 
@@ -323,7 +304,7 @@ namespace Match3Tray.UI
         {
             if (!CanAnimate) return;
 
-            foreach (Graphic graphic in _graphics) Tween.Alpha(graphic, 0.2f, 1f, duration, Ease.Linear, -1, CycleMode.Yoyo);
+            foreach (var graphic in _graphics) Tween.Alpha(graphic, 0.2f, 1f, duration, Ease.Linear, -1, CycleMode.Yoyo);
         }
     }
 
@@ -350,10 +331,7 @@ namespace Match3Tray.UI
             _pool = new Stack<T>(initialSize);
             _maxSize = maxSize;
 
-            for (int i = 0; i < initialSize; i++)
-            {
-                _pool.Push(new T());
-            }
+            for (var i = 0; i < initialSize; i++) _pool.Push(new T());
         }
 
         public T Get()

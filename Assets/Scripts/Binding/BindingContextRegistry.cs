@@ -10,8 +10,6 @@ namespace Match3Tray.Binding
     /// </summary>
     public static class BindingContextRegistry
     {
-        // Pre‑allocate with a small prime capacity to avoid early resizes.
-        // We expect only a handful of contexts (MenuScene, PlayerManager, etc.).
         private static readonly Dictionary<string, IBindingContext> _map = new(7);
 
         /// <summary>

@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -31,8 +30,8 @@ namespace Match3Tray.UI
         {
             StartCoroutine(EaseAlpha(0, 1, 0.2f));
             TargetImage.raycastTarget = true;
-            int width = Screen.width;
-            int height = Screen.height;
+            var width = Screen.width;
+            var height = Screen.height;
             _rt1 = new RenderTexture(width, height, 24);
             _rt2 = new RenderTexture(width, height, 24);
             TakeScreenShot();
@@ -67,14 +66,14 @@ namespace Match3Tray.UI
             _cam.targetTexture = _rt1;
             _cam.Render();
             _cam.targetTexture = null;
-            RenderTexture currentSource = _rt1;
-            RenderTexture currentDestination = _rt2;
-            for (int i = 0; i < BlurPasses; i++)
+            var currentSource = _rt1;
+            var currentDestination = _rt2;
+            for (var i = 0; i < BlurPasses; i++)
             {
                 BlurMaterial.SetVector("_Direction", new Vector4(1f, 0f, 0f, 0f));
                 BlurMaterial.SetFloat("_BlurSize", BlurSize);
                 Graphics.Blit(currentSource, currentDestination, BlurMaterial);
-                RenderTexture temp = currentSource;
+                var temp = currentSource;
                 currentSource = currentDestination;
                 currentDestination = temp;
                 BlurMaterial.SetVector("_Direction", new Vector4(0f, 1f, 0f, 0f));
@@ -92,14 +91,14 @@ namespace Match3Tray.UI
 
         private IEnumerator EaseAlpha(float startAlpha, float TargetAlpha, float duration)
         {
-            float elapsedTime = 0f;
-            Color temp = TargetImage.color;
+            var elapsedTime = 0f;
+            var temp = TargetImage.color;
             temp.a = startAlpha;
             TargetImage.color = temp;
             while (elapsedTime < duration)
             {
                 elapsedTime += Time.deltaTime;
-                float t = elapsedTime / duration;
+                var t = elapsedTime / duration;
                 temp.a = Mathf.LerpUnclamped(startAlpha, TargetAlpha, t);
                 TargetImage.color = temp;
                 yield return null;

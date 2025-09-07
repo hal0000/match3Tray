@@ -1,8 +1,3 @@
-// --------------------------------------------------------------------------------------------------------------------
-// Copyright (C) 2024 Halil Mentes
-// All rights reserved.
-// --------------------------------------------------------------------------------------------------------------------
-
 using System;
 using System.Buffers;
 using System.Collections.Generic;
@@ -71,7 +66,6 @@ namespace Match3Tray.Binding
                 return;
             }
 
-            // Cache expressions
             _cachedExpressions = BindingExpressions.Split(',', StringSplitOptions.RemoveEmptyEntries);
             InitializeBindings();
         }
@@ -103,9 +97,7 @@ namespace Match3Tray.Binding
                 var ctxName = expr.Substring(0, dot).Trim();
                 var remainingPath = expr.Substring(dot + 1).Trim();
 
-                // 1. Try registry
                 var ctx = BindingContextRegistry.Get(ctxName);
-                // 2. Fallback: hierarchy
                 if (ctx == null)
                     ctx = FindContextInHierarchy(transform, ctxName);
                 if (ctx == null)
@@ -114,7 +106,6 @@ namespace Match3Tray.Binding
                     continue;
                 }
 
-                // Process the remaining path (could be simple property or nested with ListBinding)
                 var parts = remainingPath.Split('.');
                 object currentObject = ctx;
                 var currentType = ctx.GetType();
@@ -123,7 +114,6 @@ namespace Match3Tray.Binding
                 {
                     var part = parts[i];
 
-                    // Check if this is a ListBinding access
                     if (part.Contains("[") && part.Contains("]"))
                     {
                         var listParts = part.Split('[', ']');
@@ -136,7 +126,6 @@ namespace Match3Tray.Binding
                         var listPropertyName = listParts[0];
                         int index;
 
-                        // If ListIndex is set (>= 0), use it instead of the index in the expression
                         if (ListIndex >= 0)
                         {
                             index = ListIndex;
@@ -150,7 +139,6 @@ namespace Match3Tray.Binding
                             }
                         }
 
-                        // Get the ListBinding property
                         var listProperty = currentType.GetProperty(listPropertyName);
                         if (listProperty == null)
                         {
@@ -165,7 +153,6 @@ namespace Match3Tray.Binding
                             continue;
                         }
 
-                        // Get the ListBinding instance
                         var listBinding = listProperty.GetValue(currentObject);
                         if (listBinding == null)
                         {
@@ -173,10 +160,8 @@ namespace Match3Tray.Binding
                             continue;
                         }
 
-                        // Get the item type from ListBinding<>
                         var itemType = listType.GetGenericArguments()[0];
 
-                        // Get the Value property from ListBinding
                         var valueProperty = listType.GetProperty("Value");
                         if (valueProperty == null)
                         {
@@ -184,7 +169,6 @@ namespace Match3Tray.Binding
                             continue;
                         }
 
-                        // Get the list from Value property
                         var list = valueProperty.GetValue(listBinding);
                         if (list == null)
                         {
@@ -192,7 +176,6 @@ namespace Match3Tray.Binding
                             continue;
                         }
 
-                        // Get the Count property
                         var countProperty = list.GetType().GetProperty("Count");
                         if (countProperty == null)
                         {
@@ -200,7 +183,6 @@ namespace Match3Tray.Binding
                             continue;
                         }
 
-                        // Check index range
                         var count = (int)countProperty.GetValue(list);
                         if (index < 0 || index >= count)
                         {
@@ -208,7 +190,6 @@ namespace Match3Tray.Binding
                             continue;
                         }
 
-                        // Get the item at the specified index using indexer
                         var indexer = list.GetType().GetProperty("Item");
                         if (indexer == null)
                         {
@@ -223,7 +204,6 @@ namespace Match3Tray.Binding
                             continue;
                         }
 
-                        // Get the Bindable property from the item
                         var bindableProperty = itemType.GetProperty(parts[i + 1]);
                         if (bindableProperty == null)
                         {
@@ -231,7 +211,6 @@ namespace Match3Tray.Binding
                             continue;
                         }
 
-                        // Get the property value
                         var propertyValue = bindableProperty.GetValue(currentObject);
                         if (propertyValue == null)
                         {
@@ -239,14 +218,12 @@ namespace Match3Tray.Binding
                             continue;
                         }
 
-                        // Set current object and type
                         currentObject = propertyValue;
                         currentType = propertyValue.GetType();
                         i++; // Skip the next part since we already processed it
                     }
                     else
                     {
-                        // Regular property access
                         var property = currentType.GetProperty(part);
                         if (property == null)
                         {
@@ -266,10 +243,8 @@ namespace Match3Tray.Binding
                     }
                 }
 
-                // Now we have the final value, create the binding
                 if (currentType.IsGenericType && currentType.GetGenericTypeDefinition() == typeof(Bindable<>))
                 {
-                    // Create binding info
                     BindingInfo bindingInfo = new(
                         currentObject,
                         currentType.GetProperty("Value"),
@@ -286,7 +261,6 @@ namespace Match3Tray.Binding
                 }
             }
 
-            // Initial push to UI
             UpdateBindings();
         }
 
@@ -309,7 +283,6 @@ namespace Match3Tray.Binding
             var c = _bindings.Count;
             if (c == 0) return;
 
-            // rent a small array
             var arr = sPool.Rent(c);
             try
             {
@@ -345,7 +318,6 @@ namespace Match3Tray.Binding
                 return;
             }
 
-            // reflect or cache the bindable
             var info = _bindings[bindingIndex];
             var bindable = info.Prop.GetValue(info.Source);
             if (bindable != null)
@@ -372,11 +344,9 @@ namespace Match3Tray.Binding
         {
             while (current != null)
             {
-                // Get all components at once to avoid multiple GetComponent calls
                 var components = current.GetComponents<MonoBehaviour>();
                 var count = components.Length;
 
-                // Use for loop instead of foreach for better performance
                 for (var i = 0; i < count; i++)
                     if (components[i] is IBindingContext context &&
                         context.GetType().Name.Equals(contextName, StringComparison.OrdinalIgnoreCase))
@@ -393,18 +363,14 @@ namespace Match3Tray.Binding
         /// </summary>
         private Delegate CreateValueChangedHandler(Type bindableType)
         {
-            // Get the value type from Bindable<T>
             var valueType = bindableType.GetGenericArguments()[0];
 
-            // Create a typed callback OnAnyChanged<T>
             var method = typeof(UIBinding)
                 .GetMethod(nameof(OnAnyChanged), BindingFlags.Instance | BindingFlags.NonPublic)!
                 .MakeGenericMethod(valueType);
 
-            // Get the event type from Bindable<T>
             var eventType = bindableType.GetEvent("OnValueChanged")!.EventHandlerType!;
 
-            // Create the delegate
             return Delegate.CreateDelegate(eventType, this, method);
         }
 

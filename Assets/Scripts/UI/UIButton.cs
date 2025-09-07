@@ -37,10 +37,7 @@ namespace Match3Tray.UI
         public void OnPointerClick(PointerEventData data)
         {
             if (ButtonDisabled) return;
-            if (data.button == PointerEventData.InputButton.Left)
-            {
-                ClickAction.Invoke();
-            }
+            if (data.button == PointerEventData.InputButton.Left) ClickAction.Invoke();
         }
 
         /// <summary>
@@ -59,8 +56,8 @@ namespace Match3Tray.UI
 
             if (NoAnimation) return;
             _scaleTween.Complete();
-            Transform tr = transform;
-            Vector3 trLocalScale = tr.localScale;
+            var tr = transform;
+            var trLocalScale = tr.localScale;
             _scaleTween = Tween.Scale(tr, trLocalScale, _originalScale * _scaleDownSize, _animationDuration, Ease.InSine);
         }
 
@@ -74,7 +71,7 @@ namespace Match3Tray.UI
                 StopHold();
             if (NoAnimation) return;
             _scaleTween.Complete();
-            Transform tr = transform;
+            var tr = transform;
             _scaleTween = Tween.Scale(tr, tr.localScale, _originalScale, _animationDuration, Ease.OutSine);
         }
 
@@ -89,7 +86,7 @@ namespace Match3Tray.UI
                 StopHold();
             if (NoAnimation) return;
             _scaleTween.Complete();
-            Transform tr = transform;
+            var tr = transform;
             _scaleTween = Tween.Scale(tr, tr.localScale, _originalScale, _animationDuration, Ease.OutSine);
         }
 

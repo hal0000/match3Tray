@@ -29,7 +29,7 @@ namespace Match3Tray.Gameplay
 
             if (_hits[best].collider.transform.parent.TryGetComponent<IFruit>(out var fruit)) OnPicked?.Invoke(fruit);
         }
-        
+
         protected override void Tick()
         {
 #if UNITY_EDITOR || UNITY_STANDALONE

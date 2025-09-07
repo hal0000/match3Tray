@@ -1,0 +1,9 @@
+{
+  "levels": [
+    { "level": 1, "tasks": [4102, 8195], "rewardGold": 2500  },
+    { "level": 2, "tasks": [12294],      "rewardGold": 4000  },
+    { "level": 3, "tasks": [32774,20483],"rewardGold": 6000  },
+    { "level": 4, "tasks": [24582,16387],"rewardGold": 8000  },
+    { "level": 5, "tasks": [28678,4099], "rewardGold": 12000 }
+  ]
+}

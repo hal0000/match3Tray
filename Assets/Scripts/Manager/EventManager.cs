@@ -21,6 +21,7 @@ namespace Match3Tray.Manager
             IsGamePaused = isPaused;
             OnPauseChanged?.Invoke(isPaused);
         }
+
         #region GameStateActions
 
         /// <summary>

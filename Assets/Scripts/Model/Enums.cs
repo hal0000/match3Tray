@@ -14,14 +14,14 @@ namespace Match3Tray.Model
             Watermelon = 7,
             Strawberry = 8
         }
-        
+
         public enum GameState
         {
             Idle = 0,
             Playing = 1,
             NextLevelPrompt = 2,
             FailedPrompt = 3,
-            GameFinishedPrompt = 4,
+            GameFinishedPrompt = 4
         }
     }
 }
