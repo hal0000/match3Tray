@@ -2,6 +2,7 @@ using System;
 using Match3Tray.Core;
 using Match3Tray.Interface;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace Match3Tray.Gameplay
 {
@@ -28,14 +29,24 @@ namespace Match3Tray.Gameplay
 
             if (_hits[best].collider.transform.parent.TryGetComponent<IFruit>(out var fruit)) OnPicked?.Invoke(fruit);
         }
-
+        
         protected override void Tick()
         {
 #if UNITY_EDITOR || UNITY_STANDALONE
-            if (Input.GetMouseButtonDown(0)) TryPick(Input.mousePosition);
+            if (!Input.GetMouseButtonDown(0)) return;
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
+
+            TryPick(Input.mousePosition);
 #else
-      if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
-            TryPick(Input.GetTouch(0).position);
+    if (Input.touchCount > 0)
+    {
+        var t = Input.GetTouch(0);
+        if (t.phase == TouchPhase.Began)
+        {
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject(t.fingerId))return;
+            TryPick(t.position);
+        }
+    }
 #endif
         }
     }

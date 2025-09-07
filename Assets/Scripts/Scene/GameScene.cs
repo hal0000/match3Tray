@@ -1,6 +1,7 @@
 using Match3Tray.Core;
 using Match3Tray.Gameplay;
 using Match3Tray.Interface;
+using Match3Tray.Logging;
 using Match3Tray.Pool;
 using PrimeTween;
 using UnityEngine;
@@ -92,7 +93,7 @@ namespace Match3Tray.Scene
         {
             if (_floor == null)
             {
-                Debug.LogError("Floor collider atanmadı.");
+                LoggerExtra.LogError("Floor collider atanmadı.");
                 return;
             }
 
